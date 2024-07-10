@@ -28,6 +28,12 @@ void setup(void) {
 
 	//load_cube_mesh_data();
 	load_obj_file_data("./assets/f22.obj");
+
+	vec3_t a = { 2.5, 6.0, 3.0 };
+	vec3_t b = { -2.2, 1.4, -1.0 };
+
+	float a_length = vec3_length(a);
+	float b_length = vec3_length(b);
 }
 
 void process_input(void) {
