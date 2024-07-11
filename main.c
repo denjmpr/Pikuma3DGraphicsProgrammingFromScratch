@@ -9,7 +9,7 @@
 
 triangle_t* triangles_to_render = NULL;
 
-vec3_t camera_position = { .x = 0, .y = 0, .z = -5 };
+vec3_t camera_position = { 0, 0, 0 };
 float fov_factor = 640;
 
 bool is_running = false;
@@ -27,14 +27,7 @@ void setup(void) {
 	);
 
 	//load_cube_mesh_data();
-	load_obj_file_data("./assets/f22.obj");
-
-	vec3_t a = { 2.5, 6.0, 3.0 };
-	vec3_t b = { -2.2, 1.4, -1.0 };
-
-	float a_length = vec3_length(a);
-	float b_length = vec3_length(b);
-	vec3_t add_ab = vec3_add(a, b);
+	load_obj_file_data("./assets/cube.obj");
 }
 
 void process_input(void) {
@@ -72,8 +65,8 @@ void update(void) {
 	triangles_to_render = NULL;
 
 	mesh.rotation.x += 0.01;
-	mesh.rotation.y += 0.00;
-	mesh.rotation.z += 0.00;
+	mesh.rotation.y += 0.01;
+	mesh.rotation.z += 0.02;
 
 	int num_faces = array_length(mesh.faces);
 	for (int i = 0; i < num_faces; i++) {
@@ -85,6 +78,8 @@ void update(void) {
 		face_vertices[2] = mesh.vertices[mesh_face.c - 1];
 
 		triangle_t projected_triangle;
+
+		vec3_t transformed_vetices[3];
 		
 		for (int j = 0; j < 3; j++) {
 			vec3_t transformed_vertex = face_vertices[j];
@@ -92,9 +87,30 @@ void update(void) {
 			transformed_vertex = vec3_rotate_y(transformed_vertex, mesh.rotation.y);
 			transformed_vertex = vec3_rotate_z(transformed_vertex, mesh.rotation.z);
 
-			transformed_vertex.z -= camera_position.z;
+			transformed_vertex.z += 5;
 
-			vec2_t projected_point = project(transformed_vertex);
+			transformed_vetices[j] = transformed_vertex;
+		}
+
+		vec3_t vector_a = transformed_vetices[0];
+		vec3_t vector_b = transformed_vetices[1];
+		vec3_t vector_c = transformed_vetices[2];
+
+		vec3_t vector_ab = vec3_sub(vector_b, vector_a);
+		vec3_t vector_ac = vec3_sub(vector_c, vector_a);
+
+		vec3_t normal = vec3_cross(vector_ab, vector_ac);
+
+		vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+
+		float dot_normal_camera = vec3_dot(normal, camera_ray);
+
+		if (dot_normal_camera < 0) {
+			continue;
+		}
+
+		for (int j = 0; j < 3; j++) {
+			vec2_t projected_point = project(transformed_vetices[j]);
 
 			projected_point.x += (window_width / 2);
 			projected_point.y += (window_height / 2);
