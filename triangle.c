@@ -1,3 +1,4 @@
+#include "display.h"
 #include "triangle.h"
 
 void int_swap(int* a, int* b) {
@@ -7,7 +8,17 @@ void int_swap(int* a, int* b) {
 }
 
 void fill_flat_bottom_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color) {
+	float inv_slope_1 = (float)(x1 - x0) / (y1 - y0);
+	float inv_slope_2 = (float)(x2 - x0) / (y2 - y0);
 
+	float x_start = x0;
+	float x_end = x0;
+
+	for (int y = y0; y <= y2; y++) {
+		draw_line(x_start, y, x_end, y, color);
+		x_start += inv_slope_1;
+		x_end += inv_slope_2;
+	}
 }
 void fill_flat_top_triangle(int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color) {
 
