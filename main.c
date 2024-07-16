@@ -136,13 +136,16 @@ void update(void) {
 			projected_points[j].y += (window_height / 2);
 		}
 
+		float avg_depth = (transformed_vetices[0].z + transformed_vetices[1].z + transformed_vetices[2].z) / 3;
+
 		triangle_t projected_triangle = {
 			.points = {
 				{ projected_points[0].x, projected_points[0].y },
 				{ projected_points[1].x, projected_points[1].y },
 				{ projected_points[2].x, projected_points[2].y }
 			},
-			.color = mesh_face.color
+			.color = mesh_face.color,
+			.avg_depth = avg_depth
 		};
 
 		array_push(triangles_to_render, projected_triangle);
