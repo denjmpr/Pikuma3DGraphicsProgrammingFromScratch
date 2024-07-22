@@ -79,9 +79,9 @@ void update(void) {
 
 	triangles_to_render = NULL;
 
-	mesh.rotation.x += 0.001;
-	//mesh.rotation.y += 0.02;
-	//mesh.rotation.z += 0.03;
+	mesh.rotation.x += 0.005;
+	mesh.rotation.y += 0.00;
+	mesh.rotation.z += 0.00;
 	mesh.translation.z = 5.0;
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
@@ -146,6 +146,8 @@ void update(void) {
 
 			projected_points[j].x *= (window_width / 2.0);
 			projected_points[j].y *= (window_height / 2.0);
+
+			projected_points[j].y *= -1;
 
 			projected_points[j].x += (window_width / 2.0);
 			projected_points[j].y += (window_height / 2.0);
