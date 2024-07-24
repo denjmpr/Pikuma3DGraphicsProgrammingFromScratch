@@ -20,7 +20,7 @@ vec3_t camera_position = { .x = 0, .y = 0, .z = 0 };
 mat4_t proj_matrix;
 
 void setup(void) {
-	render_method = RENDER_WIRE;
+	render_method = RENDER_FILL_TRIANGLE;
 	cull_method = CULL_BACKFACE;
 
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
@@ -89,9 +89,9 @@ void update(void) {
 
 	triangles_to_render = NULL;
 
-	mesh.rotation.x += 0.005;
-	mesh.rotation.y += 0.00;
-	mesh.rotation.z += 0.00;
+	mesh.rotation.x += 0.008;
+	mesh.rotation.y += 0.003;
+	mesh.rotation.z += 0.004;
 	mesh.translation.z = 5.0;
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
