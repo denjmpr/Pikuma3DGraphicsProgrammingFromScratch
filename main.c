@@ -25,6 +25,7 @@ void setup(void) {
 	cull_method = CULL_BACKFACE;
 
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
+	z_buffer = (float*)malloc(sizeof(float) * window_width * window_height);
 
 	color_buffer_texture = SDL_CreateTexture(
 		renderer,
@@ -41,9 +42,9 @@ void setup(void) {
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
 	//load_cube_mesh_data();
-	load_obj_file_data("./assets/f22.obj");
+	load_obj_file_data("./assets/f117.obj");
 
-	load_png_texture_data("./assets/f22.png");
+	load_png_texture_data("./assets/f117.png");
 }
 
 void process_input(void) {
@@ -88,10 +89,10 @@ void update(void) {
 
 	triangles_to_render = NULL;
 
-	mesh.rotation.x += -0.003;
+	mesh.rotation.x += 0.006;
 	mesh.rotation.y += 0.000;
 	mesh.rotation.z += 0.000;
-	mesh.translation.z = 5.0;
+	mesh.translation.z = 4.0;
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
 	mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
@@ -244,12 +245,14 @@ void render(void) {
 	render_color_buffer();
 
 	clear_color_buffer(0xFF000000);
+	clear_z_buffer();
 
 	SDL_RenderPresent(renderer);
 }
 
 void free_resources(void) {
 	free(color_buffer);
+	free(z_buffer);
 	upng_free(png_texture);
 	array_free(mesh.faces);
 	array_free(mesh.vertices);
