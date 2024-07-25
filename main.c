@@ -12,7 +12,9 @@
 #include "texture.h"
 #include "mesh.h"
 
-triangle_t* triangles_to_render = NULL;
+#define MAX_TRIANGLES_PER_MESH 10000
+triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
+int num_triangles_to_render = 0;
 
 bool is_running = false;
 int previous_frame_time = 0;
@@ -42,9 +44,9 @@ void setup(void) {
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
 	//load_cube_mesh_data();
-	load_obj_file_data("./assets/f117.obj");
+	load_obj_file_data("./assets/drone.obj");
 
-	load_png_texture_data("./assets/f117.png");
+	load_png_texture_data("./assets/drone.png");
 }
 
 void process_input(void) {
@@ -87,12 +89,12 @@ void update(void) {
 
 	previous_frame_time = SDL_GetTicks();
 
-	triangles_to_render = NULL;
+	num_triangles_to_render = 0;
 
-	mesh.rotation.x += 0.006;
-	mesh.rotation.y += 0.000;
+	mesh.rotation.x += 0.000;
+	mesh.rotation.y += 0.003;
 	mesh.rotation.z += 0.000;
-	mesh.translation.z = 4.0;
+	mesh.translation.z = 7.0;
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
 	mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
@@ -181,15 +183,17 @@ void update(void) {
 			.color = triangle_color
 		};
 
-		array_push(triangles_to_render, projected_triangle);
+		if (num_triangles_to_render < MAX_TRIANGLES_PER_MESH) {
+			triangles_to_render[num_triangles_to_render] = projected_triangle;
+			num_triangles_to_render++;
+		}
 	}
 }
 
 void render(void) {
 	draw_grid();
 
-	int num_triangles = array_length(triangles_to_render);
-	for (int i = 0; i < num_triangles; i++) {
+	for (int i = 0; i < num_triangles_to_render; i++) {
 		triangle_t triangle = triangles_to_render[i];
 
 		if (render_method == RENDER_FILL_TRIANGLE || render_method == RENDER_FILL_TRIANGLE_WIRE) {
@@ -225,8 +229,6 @@ void render(void) {
 			draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, 0xFFFF0000);
 		}
 	}
-
-	array_free(triangles_to_render);
 
 	render_color_buffer();
 
