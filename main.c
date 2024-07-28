@@ -8,22 +8,24 @@
 #include "vector.h"
 #include "matrix.h"
 #include "light.h"
+#include "camera.h"
 #include "triangle.h"
 #include "texture.h"
 #include "mesh.h"
+
+bool is_running = false;
+int previous_frame_time = 0;
 
 #define MAX_TRIANGLES_PER_MESH 10000
 triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
 int num_triangles_to_render = 0;
 
-bool is_running = false;
-int previous_frame_time = 0;
-
-vec3_t camera_position = { .x = 0, .y = 0, .z = 0 };
+mat4_t world_matrix;
 mat4_t proj_matrix;
+mat4_t view_matrix;
 
 void setup(void) {
-	render_method = RENDER_FILL_TRIANGLE;
+	render_method = RENDER_TEXTURED;
 	cull_method = CULL_BACKFACE;
 
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
@@ -44,9 +46,9 @@ void setup(void) {
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
 	//load_cube_mesh_data();
-	load_obj_file_data("./assets/drone.obj");
+	load_obj_file_data("./assets/efa.obj");
 
-	load_png_texture_data("./assets/drone.png");
+	load_png_texture_data("./assets/efa.png");
 }
 
 void process_input(void) {
@@ -91,10 +93,17 @@ void update(void) {
 
 	num_triangles_to_render = 0;
 
-	mesh.rotation.x += 0.000;
-	mesh.rotation.y += 0.003;
-	mesh.rotation.z += 0.000;
-	mesh.translation.z = 7.0;
+	//mesh.rotation.x += 0.006;
+	//mesh.rotation.y += 0.000;
+	//mesh.rotation.z += 0.000;
+	mesh.translation.z = 4.0;
+
+	camera.position.x += 0.008;
+	camera.position.y += 0.008;
+
+	vec3_t target = { 0, 0, 4.0 };
+	vec3_t up_direction = { 0, 1, 0 };
+	view_matrix = mat4_look_at(camera.position, target, up_direction);
 
 	mat4_t scale_matrix = mat4_make_scale(mesh.scale.x, mesh.scale.y, mesh.scale.z);
 	mat4_t translation_matrix = mat4_make_translation(mesh.translation.x, mesh.translation.y, mesh.translation.z);
@@ -116,7 +125,7 @@ void update(void) {
 		for (int j = 0; j < 3; j++) {
 			vec4_t transformed_vertex = vec4_from_vec3(face_vertices[j]);
 
-			mat4_t world_matrix = mat4_identity();
+			world_matrix = mat4_identity();
 
 			world_matrix = mat4_mul_mat4(scale_matrix, world_matrix);
 			world_matrix = mat4_mul_mat4(rotation_matrix_z, world_matrix);
@@ -125,6 +134,8 @@ void update(void) {
 			world_matrix = mat4_mul_mat4(translation_matrix, world_matrix);
 
 			transformed_vertex = mat4_mul_vec4(world_matrix, transformed_vertex);
+
+			transformed_vertex = mat4_mul_vec4(view_matrix, transformed_vertex);
 
 			transformed_vetices[j] = transformed_vertex;
 		}
@@ -141,7 +152,8 @@ void update(void) {
 		vec3_t normal = vec3_cross(vector_ab, vector_ac);
 		vec3_normalize(&normal);
 
-		vec3_t camera_ray = vec3_sub(camera_position, vector_a);
+		vec3_t origin = { 0, 0, 0 };
+		vec3_t camera_ray = vec3_sub(origin, vector_a);
 
 		float dot_normal_camera = vec3_dot(normal, camera_ray);
 
