@@ -15,6 +15,7 @@
 
 bool is_running = false;
 int previous_frame_time = 0;
+float delta_time = 0;
 
 #define MAX_TRIANGLES_PER_MESH 10000
 triangle_t triangles_to_render[MAX_TRIANGLES_PER_MESH];
@@ -46,9 +47,9 @@ void setup(void) {
 	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
 
 	//load_cube_mesh_data();
-	load_obj_file_data("./assets/efa.obj");
+	load_obj_file_data("./assets/cube.obj");
 
-	load_png_texture_data("./assets/efa.png");
+	load_png_texture_data("./assets/cube.png");
 }
 
 void process_input(void) {
@@ -89,17 +90,19 @@ void update(void) {
 		SDL_Delay(time_to_wait);
 	}
 
+	delta_time = (SDL_GetTicks() - previous_frame_time) / 1000.0;
+
 	previous_frame_time = SDL_GetTicks();
 
 	num_triangles_to_render = 0;
 
-	//mesh.rotation.x += 0.006;
-	//mesh.rotation.y += 0.000;
-	//mesh.rotation.z += 0.000;
-	mesh.translation.z = 4.0;
+	mesh.rotation.x += 0.6 * delta_time;
+	mesh.rotation.y += 0.6 * delta_time;
+	mesh.rotation.z += 0.6 * delta_time;
+	mesh.translation.z = 5.0;
 
-	camera.position.x += 0.008;
-	camera.position.y += 0.008;
+	camera.position.x += 0.0 * delta_time;
+	camera.position.y += 0.0 * delta_time;
 
 	vec3_t target = { 0, 0, 4.0 };
 	vec3_t up_direction = { 0, 1, 0 };
