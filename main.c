@@ -5,6 +5,7 @@
 #include "upng.h"
 #include "array.h"
 #include "display.h"
+#include "clipping.h"
 #include "vector.h"
 #include "matrix.h"
 #include "light.h"
@@ -42,11 +43,12 @@ void setup(void) {
 
 	float fov = M_PI / 3.0;
 	float aspect = (float)window_height / (float)window_width;
-	float znear = 0.1;
-	float zfar = 100.0;
-	proj_matrix = mat4_make_perspective(fov, aspect, znear, zfar);
+	float z_near = 0.1;
+	float z_far = 100.0;
+	proj_matrix = mat4_make_perspective(fov, aspect, z_near, z_far);
 
-	//load_cube_mesh_data();
+	init_frustum_planes(fov, z_near, z_far);
+
 	load_obj_file_data("./assets/efa.obj");
 
 	load_png_texture_data("./assets/efa.png");
