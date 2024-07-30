@@ -49,9 +49,9 @@ void setup(void) {
 
 	init_frustum_planes(fov, z_near, z_far);
 
-	load_obj_file_data("./assets/efa.obj");
+	load_obj_file_data("./assets/cube.obj");
 
-	load_png_texture_data("./assets/efa.png");
+	load_png_texture_data("./assets/cube.png");
 }
 
 void process_input(void) {
@@ -136,6 +136,8 @@ void update(void) {
 
 	int num_faces = array_length(mesh.faces);
 	for (int i = 0; i < num_faces; i++) {
+		if (i != 4) continue;
+
 		face_t mesh_face = mesh.faces[i];
 
 		vec3_t face_vertices[3];
@@ -185,6 +187,14 @@ void update(void) {
 				continue;
 			}
 		}
+
+		polygon_t polygon = create_polygon_from_triangle(
+			vec3_from_vec4(transformed_vetices[0]),
+			vec3_from_vec4(transformed_vetices[1]),
+			vec3_from_vec4(transformed_vetices[2])
+		);
+
+		clip_polygon(&polygon);
 
 		vec4_t projected_points[3];
 
