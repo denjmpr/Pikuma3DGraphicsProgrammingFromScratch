@@ -27,7 +27,7 @@ mat4_t proj_matrix;
 mat4_t view_matrix;
 
 void setup(void) {
-	render_method = RENDER_TEXTURED;
+	render_method = RENDER_WIRE;
 	cull_method = CULL_BACKFACE;
 
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
@@ -136,8 +136,6 @@ void update(void) {
 
 	int num_faces = array_length(mesh.faces);
 	for (int i = 0; i < num_faces; i++) {
-		if (i != 4) continue;
-
 		face_t mesh_face = mesh.faces[i];
 
 		vec3_t face_vertices[3];
@@ -188,7 +186,7 @@ void update(void) {
 			}
 		}
 
-		polygon_t polygon = create_polygon_from_triangle(
+		polygon_t polygon = polygon_from_triangle(
 			vec3_from_vec4(transformed_vetices[0]),
 			vec3_from_vec4(transformed_vetices[1]),
 			vec3_from_vec4(transformed_vetices[2])
@@ -196,41 +194,50 @@ void update(void) {
 
 		clip_polygon(&polygon);
 
-		vec4_t projected_points[3];
+		triangle_t triangles_after_clipping[MAX_NUM_POLY_TRIANGLES];
+		int num_triangles_after_clipping = 0;
 
-		for (int j = 0; j < 3; j++) {
-			projected_points[j] = mat4_mul_vec4_project(proj_matrix, transformed_vetices[j]);
+		triangles_from_polygon(&polygon, triangles_after_clipping, &num_triangles_after_clipping);
 
-			projected_points[j].x *= (window_width / 2.0);
-			projected_points[j].y *= (window_height / 2.0);
+		for (int t = 0; t < num_triangles_after_clipping; t++) {
+			triangle_t triangle_after_clipping = triangles_after_clipping[t];
 
-			projected_points[j].y *= -1;
+			vec4_t projected_points[3];
 
-			projected_points[j].x += (window_width / 2.0);
-			projected_points[j].y += (window_height / 2.0);
-		}
+			for (int j = 0; j < 3; j++) {
+				projected_points[j] = mat4_mul_vec4_project(proj_matrix, triangle_after_clipping.points[j]);
 
-		float light_intensity_factor = -vec3_dot(normal, light.direction);
+				projected_points[j].x *= (window_width / 2.0);
+				projected_points[j].y *= (window_height / 2.0);
 
-		uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
+				projected_points[j].y *= -1;
 
-		triangle_t projected_triangle = {
-			.points = {
-				{ projected_points[0].x, projected_points[0].y, projected_points[0].z, projected_points[0].w },
-				{ projected_points[1].x, projected_points[1].y, projected_points[1].z, projected_points[1].w },
-				{ projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w }
-			},
-			.texcoords = {
-				{ mesh_face.a_uv.u, mesh_face.a_uv.v },
-				{ mesh_face.b_uv.u, mesh_face.b_uv.v },
-				{ mesh_face.c_uv.u, mesh_face.c_uv.v }
-			},
-			.color = triangle_color
-		};
+				projected_points[j].x += (window_width / 2.0);
+				projected_points[j].y += (window_height / 2.0);
+			}
 
-		if (num_triangles_to_render < MAX_TRIANGLES_PER_MESH) {
-			triangles_to_render[num_triangles_to_render] = projected_triangle;
-			num_triangles_to_render++;
+			float light_intensity_factor = -vec3_dot(normal, light.direction);
+
+			uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
+
+			triangle_t triangle_to_render = {
+				.points = {
+					{ projected_points[0].x, projected_points[0].y, projected_points[0].z, projected_points[0].w },
+					{ projected_points[1].x, projected_points[1].y, projected_points[1].z, projected_points[1].w },
+					{ projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w }
+				},
+				.texcoords = {
+					{ mesh_face.a_uv.u, mesh_face.a_uv.v },
+					{ mesh_face.b_uv.u, mesh_face.b_uv.v },
+					{ mesh_face.c_uv.u, mesh_face.c_uv.v }
+				},
+				.color = triangle_color
+			};
+
+			if (num_triangles_to_render < MAX_TRIANGLES_PER_MESH) {
+				triangles_to_render[num_triangles_to_render] = triangle_to_render;
+				num_triangles_to_render++;
+			}
 		}
 	}
 }
@@ -269,9 +276,9 @@ void render(void) {
 		}
 
 		if (render_method == RENDER_WIRE_VERTEX) {
-			draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, 0xFFFF0000);
-			draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, 0xFFFF0000);
-			draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, 0xFFFF0000);
+			draw_rect(triangle.points[0].x - 3, triangle.points[0].y - 3, 6, 6, 0xFF0000FF);
+			draw_rect(triangle.points[1].x - 3, triangle.points[1].y - 3, 6, 6, 0xFF0000FF);
+			draw_rect(triangle.points[2].x - 3, triangle.points[2].y - 3, 6, 6, 0xFF0000FF);
 		}
 	}
 
