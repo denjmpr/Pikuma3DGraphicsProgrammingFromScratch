@@ -41,13 +41,15 @@ void setup(void) {
 		window_height
 	);
 
-	float fov = M_PI / 3.0;
-	float aspect = (float)window_height / (float)window_width;
+	float aspectx = (float)window_width / (float)window_height;
+	float aspecty = (float)window_height / (float)window_width;
+	float fovy = M_PI / 3.0;
+	float fovx = atan(tan(fovy / 2) * aspectx) * 2.0;
 	float z_near = 0.1;
 	float z_far = 100.0;
-	proj_matrix = mat4_make_perspective(fov, aspect, z_near, z_far);
+	proj_matrix = mat4_make_perspective(fovy, aspecty, z_near, z_far);
 
-	init_frustum_planes(fov, z_near, z_far);
+	init_frustum_planes(fovx, fovy, z_near, z_far);
 
 	load_obj_file_data("./assets/cube.obj");
 
