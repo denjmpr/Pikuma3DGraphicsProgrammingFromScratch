@@ -27,7 +27,7 @@ mat4_t proj_matrix;
 mat4_t view_matrix;
 
 void setup(void) {
-	render_method = RENDER_WIRE;
+	render_method = RENDER_TEXTURED;
 	cull_method = CULL_BACKFACE;
 
 	color_buffer = (uint32_t*)malloc(sizeof(uint32_t) * window_width * window_height);
@@ -51,9 +51,9 @@ void setup(void) {
 
 	init_frustum_planes(fovx, fovy, z_near, z_far);
 
-	load_obj_file_data("./assets/cube.obj");
+	load_obj_file_data("./assets/f117.obj");
 
-	load_png_texture_data("./assets/cube.png");
+	load_png_texture_data("./assets/f117.png");
 }
 
 void process_input(void) {
@@ -191,7 +191,10 @@ void update(void) {
 		polygon_t polygon = polygon_from_triangle(
 			vec3_from_vec4(transformed_vetices[0]),
 			vec3_from_vec4(transformed_vetices[1]),
-			vec3_from_vec4(transformed_vetices[2])
+			vec3_from_vec4(transformed_vetices[2]),
+			mesh_face.a_uv,
+			mesh_face.b_uv,
+			mesh_face.c_uv
 		);
 
 		clip_polygon(&polygon);
@@ -229,9 +232,9 @@ void update(void) {
 					{ projected_points[2].x, projected_points[2].y, projected_points[2].z, projected_points[2].w }
 				},
 				.texcoords = {
-					{ mesh_face.a_uv.u, mesh_face.a_uv.v },
-					{ mesh_face.b_uv.u, mesh_face.b_uv.v },
-					{ mesh_face.c_uv.u, mesh_face.c_uv.v }
+					{ triangle_after_clipping.texcoords[0].u, triangle_after_clipping.texcoords[0].v },
+					{ triangle_after_clipping.texcoords[1].u, triangle_after_clipping.texcoords[1].v },
+					{ triangle_after_clipping.texcoords[2].u, triangle_after_clipping.texcoords[2].v }
 				},
 				.color = triangle_color
 			};
