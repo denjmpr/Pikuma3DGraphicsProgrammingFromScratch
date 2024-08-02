@@ -30,6 +30,8 @@ void setup(void) {
 	set_render_method(RENDER_WIRE);
 	set_cull_method(CULL_BACKFACE);
 
+	init_light(vec3_new(0, 0, 1));
+
 	float aspectx = (float)get_window_width() / (float)get_window_height();
 	float aspecty = (float)get_window_height() / (float)get_window_width();
 	float fovy = M_PI / 3.0;
@@ -238,7 +240,7 @@ void update(void) {
 				projected_points[j].y += (get_window_height() / 2.0);
 			}
 
-			float light_intensity_factor = -vec3_dot(normal, light.direction);
+			float light_intensity_factor = -vec3_dot(normal, get_light_direction());
 
 			uint32_t triangle_color = light_apply_intensity(mesh_face.color, light_intensity_factor);
 
