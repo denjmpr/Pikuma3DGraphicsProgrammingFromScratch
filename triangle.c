@@ -46,10 +46,9 @@ void draw_triangle_pixel(
 
 	interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
-	if (interpolated_reciprocal_w < z_buffer[(window_width * y) + x]) {
+	if (interpolated_reciprocal_w < get_zbuffer_at(x, y)) {
 		draw_pixel(x, y, color);
-
-		z_buffer[(window_width * y) + x] = interpolated_reciprocal_w;
+		update_zbuffer_at(x, y, interpolated_reciprocal_w);
 	}
 }
 
@@ -130,8 +129,6 @@ void draw_triangle_texel(
 	vec4_t point_a, vec4_t point_b, vec4_t point_c,
 	tex2_t a_uv, tex2_t b_uv, tex2_t c_uv
 ) {
-	if (x < 0 || x >= window_width || y < 0 || y >= window_height) return;
-
 	vec2_t p = { x, y };
 	vec2_t a = vec2_from_vec4(point_a);
 	vec2_t b = vec2_from_vec4(point_b);
@@ -160,10 +157,10 @@ void draw_triangle_texel(
 
 	interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w;
 
-	if (interpolated_reciprocal_w < z_buffer[(window_width * y) + x]) {
+	if (interpolated_reciprocal_w < get_zbuffer_at(x, y)) {
 		draw_pixel(x, y, texture[(texture_width * tex_y) + tex_x]);
 
-		z_buffer[(window_width * y) + x] = interpolated_reciprocal_w;
+		update_zbuffer_at(x, y, interpolated_reciprocal_w);
 	}
 }
 
