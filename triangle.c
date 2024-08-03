@@ -152,6 +152,7 @@ void draw_triangle_texel(
 	interpolated_u /= interpolated_reciprocal_w;
 	interpolated_v /= interpolated_reciprocal_w;
 
+	/*
 	int tex_x = abs((int)(interpolated_u * texture_width)) % texture_width;
 	int tex_y = abs((int)(interpolated_v * texture_height)) % texture_height;
 
@@ -162,6 +163,7 @@ void draw_triangle_texel(
 
 		update_zbuffer_at(x, y, interpolated_reciprocal_w);
 	}
+	*/
 }
 
 void draw_textured_triangle(
